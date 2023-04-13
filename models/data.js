@@ -1,4 +1,3 @@
-const { timeLog, timeStamp } = require('console');
 const mongoose = require('mongoose');
 
 const data = new mongoose.Schema({
