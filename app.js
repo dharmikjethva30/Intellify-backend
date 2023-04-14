@@ -53,7 +53,7 @@ app.get("/set_threshold", (req, res) => {
         res.status(400).send("please provide value")
         return
     }
-    client.publish(pub_topic, message, pub_options, function (err) {
+    client.publish(pub_topic, message, pub_options, (err) => {
         if (err) {
             console.log("An error occurred during publish")
             res.status(400).send(err)
@@ -108,10 +108,10 @@ app.get("/hello", (req, res) => {
 })
 
 // Subscribe
-client.on('connect', async function () {
+client.on('connect', async () => {
     console.log('Connection successful');
 
-    client.subscribe(sub_topic, sub_options, function (err) {
+    client.subscribe(sub_topic, sub_options, (err) => {
         if (err) {
             console.log("An error occurred while subscribing")
         } else {
@@ -119,7 +119,7 @@ client.on('connect', async function () {
         }
     })
 
-    client.on("message", async function (topic, payload) {
+    client.on("message", async (topic, payload) => {
         const data = JSON.parse(payload.toString())
         console.log(data)
         const newData = new Data({
@@ -135,17 +135,17 @@ client.on('connect', async function () {
 })
 
 // Handle errors
-client.on("error", function (error) {
+client.on("error", (error) => {
     console.log("Error occurred: " + error);
 });
 
 // Notify reconnection
-client.on("reconnect", function () {
+client.on("reconnect", () => {
     console.log("Reconnection starting");
 });
 
 // Notify offline status
-client.on("offline", function () {
+client.on("offline", () => {
     console.log("Currently offline. Please check internet!");
 });
 
