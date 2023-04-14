@@ -11,6 +11,8 @@ let connection = null
 let sub_topic = 'intellify/pub';
 let sub_options = { qos: 0 };
 
+let mail
+
 // Publisher variables
 let pub_topic = 'intellify/sub';
 let pub_options = { qos: 0, retain: false };
@@ -40,6 +42,11 @@ app.get("/", (req, res) => {
     })
 })
 
+app.get("/set_mail", (req, res) => {
+    mail = req.query.mail;
+    res.send(mail)
+})
+
 app.get("/set_threshold", (req, res) => {
     let message = req.query.threshold
     if (message == undefined) {
@@ -60,10 +67,14 @@ app.get("/set_threshold", (req, res) => {
 app.get("/get_suggestion", async (req, res) => {
 
     try {
-        let n = 40
-        let p = 40
-        let k = 40
-        let ph = 6.5
+
+        let npkph = await fetch(`https://super-rugby-shirt-eel.cyclic.app/farm/getNPKpH/?email=${mail}`)
+        npkph = await npkph.json()
+
+        let n = npkph.Nitrogen
+        let p = npkph.Phosphorus
+        let k = npkph.Potassium
+        let ph = npkph.pH
         let rain = 80
 
         let data = await Data.aggregate([
@@ -78,16 +89,14 @@ app.get("/get_suggestion", async (req, res) => {
             }
         ])
 
-        console.log(data)
         let temp = data[0].temperature
         let hum = data[0].humidity
 
         let url = `http://127.0.0.1:5000/predict?n=${n}&p=${p}&k=${k}&temp=${temp}&hum=${hum}&ph=${ph}&rain=${rain}`;
-        console.log(url)
         let result = await fetch(url)
         result = await result.json()
 
-        res.send(result)
+        res.send({ result: result.result, n, p, k, ph, rain, temp, hum })
     } catch (error) {
         res.status(400).send("something went wrong " + error)
     }
